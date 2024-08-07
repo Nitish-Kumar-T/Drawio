@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drawing App</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <h1>Drawing App</h1>
     <canvas id="drawingCanvas" width="800" height="600"></canvas>
@@ -21,7 +23,20 @@
             <option value="triangle">Triangle</option>
         </select>
         <button id="fillTool">Fill</button>
+        <button id="textTool">Text</button>
+        <input type="text" id="textInput" placeholder="Enter text">
+        <select id="fontSelect">
+            <option value="Arial">Arial</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Times New Roman">Times New Roman</option>
+        </select>
+    </div>
+    <div id="layersPanel">
+        <h3>Layers</h3>
+        <ul id="layersList"></ul>
+        <button id="addLayerBtn">Add Layer</button>
     </div>
     <script src="script.js"></script>
 </body>
+
 </html>

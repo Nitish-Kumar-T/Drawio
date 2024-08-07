@@ -197,3 +197,86 @@ function hexToRgb(hex) {
 }
 
 fillButton.addEventListener('click', toggleFill);
+
+const textButton = document.getElementById('textTool');
+const textInput = document.getElementById('textInput');
+const fontSelect = document.getElementById('fontSelect');
+let isTextMode = false;
+
+function toggleTextMode() {
+    isTextMode = !isTextMode;
+    textButton.classList.toggle('active');
+}
+
+function addText(e) {
+    if (!isTextMode) return;
+    const x = e.clientX - canvas.offsetLeft;
+    const y = e.clientY - canvas.offsetTop;
+    const text = textInput.value;
+    
+    ctx.font = `${lineWidthPicker.value * 2}px ${fontSelect.value}`;
+    ctx.fillStyle = colorPicker.value;
+    ctx.fillText(text, x, y);
+    saveDrawingState();
+}
+
+textButton.addEventListener('click', toggleTextMode);
+canvas.addEventListener('click', addText);
+
+const layersList = document.getElementById('layersList');
+const addLayerBtn = document.getElementById('addLayerBtn');
+let layers = [];
+let activeLayer = null;
+
+function createLayer() {
+    const layerCanvas = document.createElement('canvas');
+    layerCanvas.width = canvas.width;
+    layerCanvas.height = canvas.height;
+    const layer = {
+        canvas: layerCanvas,
+        ctx: layerCanvas.getContext('2d')
+    };
+    layers.push(layer);
+    activeLayer = layer;
+    updateLayersList();
+    return layer;
+}
+
+function updateLayersList() {
+    layersList.innerHTML = '';
+    layers.forEach((layer, index) => {
+        const li = document.createElement('li');
+        li.className = 'layerItem';
+        li.innerHTML = `
+            <span>Layer ${index + 1}</span>
+            <button class="deleteLayerBtn">Delete</button>
+        `;
+        li.querySelector('.deleteLayerBtn').addEventListener('click', () => deleteLayer(index));
+        li.addEventListener('click', () => setActiveLayer(index));
+        layersList.appendChild(li);
+    });
+}
+
+function deleteLayer(index) {
+    layers.splice(index, 1);
+    if (layers.length === 0) {
+        createLayer();
+    }
+    activeLayer = layers[layers.length - 1];
+    updateLayersList();
+    redrawCanvas();
+}
+
+function setActiveLayer(index) {
+    activeLayer = layers[index];
+    updateLayersList();
+}
+
+function redrawCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    layers.forEach(layer => {
+        ctx.drawImage(layer.canvas, 0, 0);
+    });
+}
+
+addLayerBtn.addEventListener('click', createLayer);

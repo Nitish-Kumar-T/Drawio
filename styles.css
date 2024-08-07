@@ -31,3 +31,23 @@ button {
 .controls button.active {
     background-color: #ddd;
 }
+#layersPanel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+#layersList {
+    list-style-type: none;
+    padding: 0;
+}
+
+.layerItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
