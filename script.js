@@ -1,3 +1,12 @@
+const brushPresets = document.getElementById('brushPresets');
+const createCustomBrushBtn = document.getElementById('createCustomBrush');
+const customBrushModal = document.getElementById('customBrushModal');
+const customBrushCanvas = document.getElementById('customBrushCanvas');
+const saveCustomBrushBtn = document.getElementById('saveCustomBrush');
+const cancelCustomBrushBtn = document.getElementById('cancelCustomBrush');
+let customBrushCtx = customBrushCanvas.getContext('2d');
+let customBrushPattern = null;
+
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
 const colorPicker = document.getElementById('colorPicker');
@@ -77,6 +86,12 @@ function draw(e) {
             ctx.lineTo(x + ctx.lineWidth / 2, y + ctx.lineWidth / 2);
             ctx.closePath();
             ctx.fill();
+            break;
+        case 'custom':
+            if (customBrushPattern) {
+                ctx.fillStyle = customBrushPattern;
+                ctx.fillRect(x - ctx.lineWidth / 2, y - ctx.lineWidth / 2, ctx.lineWidth, ctx.lineWidth);
+            }
             break;
         default:
             ctx.beginPath();
@@ -259,6 +274,40 @@ function setActiveLayer(layer) {
     ctx.drawImage(layers[activeLayer].canvas, 0, 0);
     saveDrawingState();
 }
+
+function openCustomBrushModal() {
+    customBrushModal.style.display = 'block';
+    customBrushCtx.clearRect(0, 0, customBrushCanvas.width, customBrushCanvas.height);
+}
+
+function closeCustomBrushModal() {
+    customBrushModal.style.display = 'none';
+}
+
+function saveCustomBrush() {
+    customBrushPattern = ctx.createPattern(customBrushCanvas, 'repeat');
+    brushPresets.value = 'custom';
+    closeCustomBrushModal();
+}
+
+createCustomBrushBtn.addEventListener('click', openCustomBrushModal);
+saveCustomBrushBtn.addEventListener('click', saveCustomBrush);
+cancelCustomBrushBtn.addEventListener('click', closeCustomBrushModal);
+
+customBrushCanvas.addEventListener('mousedown', startDrawing);
+customBrushCanvas.addEventListener('mousemove', (e) => {
+    if (isDrawing) {
+        const rect = customBrushCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        customBrushCtx.fillStyle = colorPicker.value;
+        customBrushCtx.beginPath();
+        customBrushCtx.arc(x, y, 2, 0, Math.PI * 2);
+        customBrushCtx.fill();
+    }
+});
+customBrushCanvas.addEventListener('mouseup', stopDrawing);
+customBrushCanvas.addEventListener('mouseout', stopDrawing);
 
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);

@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canvas Drawing App</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        #customBrushCanvas {
+            border: 1px solid #ccc;
+        }
+    </style>
 </head>
 <body>
     <h1>Canvas Drawing App</h1>
@@ -31,6 +53,13 @@
             <option value="square">Square</option>
             <option value="triangle">Triangle</option>
         </select>
+        <select id="brushPresets">
+            <option value="round">Round</option>
+            <option value="square">Square</option>
+            <option value="triangle">Triangle</option>
+            <option value="custom">Custom</option>
+        </select>
+        <button id="createCustomBrush">Create Custom Brush</button>
     </div>
     <div id="layersPanel">
         <ul id="layersList"></ul>
@@ -66,6 +95,13 @@
             <input type="number" id="canvasHeight">
             <button id="applyResizeBtn">Apply</button>
             <button id="cancelResizeBtn">Cancel</button>
+        </div>
+    </div>
+    <div id="customBrushModal" class="modal">
+        <div class="modal-content">
+            <canvas id="customBrushCanvas" width="100" height="100"></canvas>
+            <button id="saveCustomBrush">Save Custom Brush</button>
+            <button id="cancelCustomBrush">Cancel</button>
         </div>
     </div>
     <script src="script.js"></script>
