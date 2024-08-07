@@ -280,3 +280,85 @@ function redrawCanvas() {
 }
 
 addLayerBtn.addEventListener('click', createLayer);
+
+const imageUpload = document.getElementById('imageUpload');
+
+function handleImageUpload(e) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            const aspectRatio = img.width / img.height;
+            let newWidth = canvas.width;
+            let newHeight = canvas.height;
+            
+            if (img.width > img.height) {
+                newHeight = canvas.width / aspectRatio;
+            } else {
+                newWidth = canvas.height * aspectRatio;
+            }
+            
+            activeLayer.ctx.drawImage(img, 0, 0, newWidth, newHeight);
+            redrawCanvas();
+            saveDrawingState();
+        }
+        img.src = event.target.result;
+    }
+    
+    reader.readAsDataURL(file);
+}
+imageUpload.addEventListener('change', handleImageUpload);
+
+const resizeCanvasBtn = document.getElementById('resizeCanvasBtn');
+const resizeModal = document.getElementById('resizeModal');
+const applyResizeBtn = document.getElementById('applyResizeBtn');
+const cancelResizeBtn = document.getElementById('cancelResizeBtn');
+const canvasWidthInput = document.getElementById('canvasWidth');
+const canvasHeightInput = document.getElementById('canvasHeight');
+
+function openResizeModal() {
+    resizeModal.style.display = 'block';
+    canvasWidthInput.value = canvas.width;
+    canvasHeightInput.value = canvas.height;
+}
+
+function closeResizeModal() {
+    resizeModal.style.display = 'none';
+}
+
+function applyResize() {
+    const newWidth = parseInt(canvasWidthInput.value);
+    const newHeight = parseInt(canvasHeightInput.value);
+    
+    if (newWidth > 0 && newHeight > 0) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+        
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        ctx.drawImage(tempCanvas, 0, 0, newWidth, newHeight);
+        
+        layers.forEach(layer => {
+            const layerTempCanvas = document.createElement('canvas');
+            layerTempCanvas.width = layer.canvas.width;
+            layerTempCanvas.height = layer.canvas.height;
+            layerTempCanvas.getContext('2d').drawImage(layer.canvas, 0, 0);
+            
+            layer.canvas.width = newWidth;
+            layer.canvas.height = newHeight;
+            layer.ctx.drawImage(layerTempCanvas, 0, 0, newWidth, newHeight);
+        });
+        
+        redrawCanvas();
+        saveDrawingState();
+        closeResizeModal();
+    }
+}
+
+resizeCanvasBtn.addEventListener('click', openResizeModal);
+applyResizeBtn.addEventListener('click', applyResize);
+cancelResizeBtn.addEventListener('click', closeResizeModal);

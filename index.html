@@ -30,11 +30,22 @@
             <option value="Verdana">Verdana</option>
             <option value="Times New Roman">Times New Roman</option>
         </select>
+        <input type="file" id="imageUpload" accept="image/*">
+        <button id="resizeCanvasBtn">Resize Canvas</button>
     </div>
     <div id="layersPanel">
         <h3>Layers</h3>
         <ul id="layersList"></ul>
         <button id="addLayerBtn">Add Layer</button>
+    </div>
+    <div id="resizeModal" class="modal">
+        <div class="modal-content">
+            <h2>Resize Canvas</h2>
+            <input type="number" id="canvasWidth" placeholder="Width">
+            <input type="number" id="canvasHeight" placeholder="Height">
+            <button id="applyResizeBtn">Apply</button>
+            <button id="cancelResizeBtn">Cancel</button>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
