@@ -61,3 +61,43 @@ function draw(e) {
 }
 
 eraserButton.addEventListener('click', toggleEraser);
+
+const undoButton = document.getElementById('undoButton');
+let drawingHistory = [];
+let currentStep = -1;
+
+function saveDrawingState() {
+    currentStep++;
+    if (currentStep < drawingHistory.length) {
+        drawingHistory.length = currentStep;
+    }
+    drawingHistory.push(canvas.toDataURL());
+}
+
+function undo() {
+    if (currentStep > 0) {
+        currentStep--;
+        const img = new Image();
+        img.src = drawingHistory[currentStep];
+        img.onload = function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+        }
+    }
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    draw(e);
+    saveDrawingState();
+}
+
+function stopDrawing() {
+    if (isDrawing) {
+        isDrawing = false;
+        ctx.beginPath();
+        saveDrawingState();
+    }
+}
+
+undoButton.addEventListener('click', undo);
