@@ -1,60 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drawing App</title>
+    <title>Canvas Drawing App</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-    <h1>Drawing App</h1>
+    <h1>Canvas Drawing App</h1>
     <canvas id="drawingCanvas" width="800" height="600"></canvas>
     <div class="controls">
         <input type="color" id="colorPicker" value="#000000">
         <input type="range" id="lineWidth" min="1" max="50" value="5">
-        <button id="clearCanvas">Clear Canvas</button>
+        <button id="clearCanvas">Clear</button>
         <button id="eraserTool">Eraser</button>
         <button id="undoButton">Undo</button>
-        <select id="brushShape">
-            <option value="round">Round</option>
-            <option value="square">Square</option>
-            <option value="triangle">Triangle</option>
-        </select>
         <button id="fillTool">Fill</button>
         <button id="textTool">Text</button>
-        <input type="text" id="textInput" placeholder="Enter text">
+        <input type="text" id="textInput">
         <select id="fontSelect">
             <option value="Arial">Arial</option>
             <option value="Verdana">Verdana</option>
             <option value="Times New Roman">Times New Roman</option>
         </select>
-        <input type="file" id="imageUpload" accept="image/*">
+        <input type="file" id="imageUpload">
         <button id="resizeCanvasBtn">Resize Canvas</button>
-        <button id="gradientTool">Gradient</button>
-        <select id="gradientType">
-            <option value="linear">Linear</option>
-            <option value="radial">Radial</option>
+        <button id="addLayerBtn">Add Layer</button>
+        <select id="brushShape">
+            <option value="round">Round</option>
+            <option value="square">Square</option>
+            <option value="triangle">Triangle</option>
         </select>
-        <input type="color" id="gradientColor1" value="#000000">
-        <input type="color" id="gradientColor2" value="#ffffff">
     </div>
     <div id="layersPanel">
-        <h3>Layers</h3>
         <ul id="layersList"></ul>
-        <button id="addLayerBtn">Add Layer</button>
+    </div>
+    <div class="layerControls">
+        <label for="layerOpacity">Layer Opacity:</label>
+        <input type="range" id="layerOpacity" min="0" max="1" step="0.01" value="1">
+        <label for="blendMode">Blend Mode:</label>
+        <select id="blendMode">
+            <option value="source-over">Normal</option>
+            <option value="multiply">Multiply</option>
+            <option value="screen">Screen</option>
+            <option value="overlay">Overlay</option>
+            <option value="darken">Darken</option>
+            <option value="lighten">Lighten</option>
+            <option value="color-dodge">Color Dodge</option>
+            <option value="color-burn">Color Burn</option>
+            <option value="hard-light">Hard Light</option>
+            <option value="soft-light">Soft Light</option>
+            <option value="difference">Difference</option>
+            <option value="exclusion">Exclusion</option>
+            <option value="hue">Hue</option>
+            <option value="saturation">Saturation</option>
+            <option value="color">Color</option>
+            <option value="luminosity">Luminosity</option>
+        </select>
     </div>
     <div id="resizeModal" class="modal">
         <div class="modal-content">
-            <h2>Resize Canvas</h2>
-            <input type="number" id="canvasWidth" placeholder="Width">
-            <input type="number" id="canvasHeight" placeholder="Height">
+            <label for="canvasWidth">Width:</label>
+            <input type="number" id="canvasWidth">
+            <label for="canvasHeight">Height:</label>
+            <input type="number" id="canvasHeight">
             <button id="applyResizeBtn">Apply</button>
             <button id="cancelResizeBtn">Cancel</button>
         </div>
     </div>
     <script src="script.js"></script>
 </body>
-
 </html>

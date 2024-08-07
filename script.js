@@ -23,6 +23,8 @@ const gradientColor1 = document.getElementById('gradientColor1');
 const gradientColor2 = document.getElementById('gradientColor2');
 const layersList = document.getElementById('layersList');
 const addLayerBtn = document.getElementById('addLayerBtn');
+const layerOpacity = document.getElementById('layerOpacity');
+const blendMode = document.getElementById('blendMode');
 
 let isDrawing = false;
 let isErasing = false;
@@ -59,6 +61,8 @@ function draw(e) {
     const x = e.clientX - canvas.offsetLeft;
     const y = e.clientY - canvas.offsetTop;
 
+    ctx.globalAlpha = layerOpacity.value;
+    ctx.globalCompositeOperation = blendMode.value;
     ctx.strokeStyle = isErasing ? '#ffffff' : colorPicker.value;
     ctx.lineWidth = lineWidthPicker.value;
 
@@ -161,11 +165,12 @@ function toggleTextMode() {
 
 function addText(e) {
     if (!isTextMode) return;
+
     const x = e.clientX - canvas.offsetLeft;
     const y = e.clientY - canvas.offsetTop;
     const text = textInput.value;
-    
-    ctx.font = `${lineWidthPicker.value * 2}px ${fontSelect.value}`;
+
+    ctx.font = `20px ${fontSelect.value}`;
     ctx.fillStyle = colorPicker.value;
     ctx.fillText(text, x, y);
     saveDrawingState();
@@ -270,5 +275,7 @@ applyResizeBtn.addEventListener('click', applyCanvasResize);
 cancelResizeBtn.addEventListener('click', toggleResizeModal);
 gradientTool.addEventListener('click', toggleGradientMode);
 addLayerBtn.addEventListener('click', addLayer);
+layerOpacity.addEventListener('input', updateLayerOpacity);
+blendMode.addEventListener('change', updateBlendMode);
 
 addLayer();

@@ -67,4 +67,19 @@ canvas {
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.layerControls {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.layerControls label {
+    margin-right: 5px;
+}
+
+.layerControls input, .layerControls select {
+    margin-right: 15px;
 }
