@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,17 +18,20 @@
             justify-content: center;
             align-items: center;
         }
+
         .modal-content {
             background: #fff;
             padding: 20px;
             border-radius: 5px;
             text-align: center;
         }
+
         #customBrushCanvas {
             border: 1px solid #ccc;
         }
     </style>
 </head>
+
 <body>
     <h1>Canvas Drawing App</h1>
     <canvas id="drawingCanvas" width="800" height="600"></canvas>
@@ -60,6 +64,14 @@
             <option value="custom">Custom</option>
         </select>
         <button id="createCustomBrush">Create Custom Brush</button>
+        <button id="symmetryMode">Symmetry Mode</button>
+        <select id="symmetryType">
+            <option value="vertical">Vertical</option>
+            <option value="horizontal">Horizontal</option>
+            <option value="radial">Radial</option>
+        </select>
+        <button id="undoBtn">Undo</button>
+        <button id="redoBtn">Redo</button>
     </div>
     <div id="layersPanel">
         <ul id="layersList"></ul>
@@ -106,4 +118,5 @@
     </div>
     <script src="script.js"></script>
 </body>
+
 </html>
