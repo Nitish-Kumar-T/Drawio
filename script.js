@@ -3,88 +3,37 @@ const ctx = canvas.getContext('2d');
 const colorPicker = document.getElementById('colorPicker');
 const lineWidthPicker = document.getElementById('lineWidth');
 const clearButton = document.getElementById('clearCanvas');
+const eraserButton = document.getElementById('eraserTool');
+const undoButton = document.getElementById('undoButton');
+const brushShapeSelect = document.getElementById('brushShape');
+const fillButton = document.getElementById('fillTool');
+const textButton = document.getElementById('textTool');
+const textInput = document.getElementById('textInput');
+const fontSelect = document.getElementById('fontSelect');
+const imageUpload = document.getElementById('imageUpload');
+const resizeCanvasBtn = document.getElementById('resizeCanvasBtn');
+const resizeModal = document.getElementById('resizeModal');
+const applyResizeBtn = document.getElementById('applyResizeBtn');
+const cancelResizeBtn = document.getElementById('cancelResizeBtn');
+const canvasWidthInput = document.getElementById('canvasWidth');
+const canvasHeightInput = document.getElementById('canvasHeight');
+const gradientTool = document.getElementById('gradientTool');
+const gradientType = document.getElementById('gradientType');
+const gradientColor1 = document.getElementById('gradientColor1');
+const gradientColor2 = document.getElementById('gradientColor2');
+const layersList = document.getElementById('layersList');
+const addLayerBtn = document.getElementById('addLayerBtn');
 
 let isDrawing = false;
-
-function startDrawing(e) {
-    isDrawing = true;
-    draw(e);
-}
-
-function stopDrawing() {
-    isDrawing = false;
-    ctx.beginPath();
-}
-
-function draw(e) {
-    if (!isDrawing) return;
-    ctx.strokeStyle = colorPicker.value;
-    ctx.lineWidth = lineWidthPicker.value;
-    ctx.lineCap = 'round';
-    ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-}
-
-function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseout', stopDrawing);
-clearButton.addEventListener('click', clearCanvas);
-
-const eraserButton = document.getElementById('eraserTool');
 let isErasing = false;
-
-function toggleEraser() {
-    isErasing = !isErasing;
-    eraserButton.classList.toggle('active');
-}
-
-function draw(e) {
-    if (!isDrawing) return;
-    if (isErasing) {
-        ctx.strokeStyle = '#ffffff';
-    } else {
-        ctx.strokeStyle = colorPicker.value;
-    }
-    ctx.lineWidth = lineWidthPicker.value;
-    ctx.lineCap = 'round';
-    ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-}
-
-eraserButton.addEventListener('click', toggleEraser);
-
-const undoButton = document.getElementById('undoButton');
+let isFilling = false;
+let isTextMode = false;
+let isGradientMode = false;
+let gradientStartPoint = null;
 let drawingHistory = [];
 let currentStep = -1;
-
-function saveDrawingState() {
-    currentStep++;
-    if (currentStep < drawingHistory.length) {
-        drawingHistory.length = currentStep;
-    }
-    drawingHistory.push(canvas.toDataURL());
-}
-
-function undo() {
-    if (currentStep > 0) {
-        currentStep--;
-        const img = new Image();
-        img.src = drawingHistory[currentStep];
-        img.onload = function () {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-        }
-    }
-}
+let layers = [];
+let activeLayer = null;
 
 function startDrawing(e) {
     isDrawing = true;
@@ -100,12 +49,13 @@ function stopDrawing() {
     }
 }
 
-undoButton.addEventListener('click', undo);
-
-const brushShapeSelect = document.getElementById('brushShape');
-
 function draw(e) {
     if (!isDrawing) return;
+    if (isGradientMode) {
+        createGradient(e);
+        return;
+    }
+
     const x = e.clientX - canvas.offsetLeft;
     const y = e.clientY - canvas.offsetTop;
 
@@ -131,8 +81,34 @@ function draw(e) {
     }
 }
 
-const fillButton = document.getElementById('fillTool');
-let isFilling = false;
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function toggleEraser() {
+    isErasing = !isErasing;
+    eraserButton.classList.toggle('active');
+}
+
+function saveDrawingState() {
+    currentStep++;
+    if (currentStep < drawingHistory.length) {
+        drawingHistory.length = currentStep;
+    }
+    drawingHistory.push(canvas.toDataURL());
+}
+
+function undo() {
+    if (currentStep > 0) {
+        currentStep--;
+        const img = new Image();
+        img.src = drawingHistory[currentStep];
+        img.onload = function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+        }
+    }
+}
 
 function toggleFill() {
     isFilling = !isFilling;
@@ -178,31 +154,6 @@ function colorMatch(a, b) {
     return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3];
 }
 
-canvas.addEventListener('click', (e) => {
-    if (isFilling) {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const fillColor = hexToRgb(colorPicker.value);
-        floodFill(Math.floor(x), Math.floor(y), fillColor);
-        saveDrawingState();
-    }
-});
-
-function hexToRgb(hex) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return [r, g, b, 255];
-}
-
-fillButton.addEventListener('click', toggleFill);
-
-const textButton = document.getElementById('textTool');
-const textInput = document.getElementById('textInput');
-const fontSelect = document.getElementById('fontSelect');
-let isTextMode = false;
-
 function toggleTextMode() {
     isTextMode = !isTextMode;
     textButton.classList.toggle('active');
@@ -220,145 +171,104 @@ function addText(e) {
     saveDrawingState();
 }
 
-textButton.addEventListener('click', toggleTextMode);
-canvas.addEventListener('click', addText);
-
-const layersList = document.getElementById('layersList');
-const addLayerBtn = document.getElementById('addLayerBtn');
-let layers = [];
-let activeLayer = null;
-
-function createLayer() {
-    const layerCanvas = document.createElement('canvas');
-    layerCanvas.width = canvas.width;
-    layerCanvas.height = canvas.height;
-    const layer = {
-        canvas: layerCanvas,
-        ctx: layerCanvas.getContext('2d')
-    };
-    layers.push(layer);
-    activeLayer = layer;
-    updateLayersList();
-    return layer;
-}
-
-function updateLayersList() {
-    layersList.innerHTML = '';
-    layers.forEach((layer, index) => {
-        const li = document.createElement('li');
-        li.className = 'layerItem';
-        li.innerHTML = `
-            <span>Layer ${index + 1}</span>
-            <button class="deleteLayerBtn">Delete</button>
-        `;
-        li.querySelector('.deleteLayerBtn').addEventListener('click', () => deleteLayer(index));
-        li.addEventListener('click', () => setActiveLayer(index));
-        layersList.appendChild(li);
-    });
-}
-
-function deleteLayer(index) {
-    layers.splice(index, 1);
-    if (layers.length === 0) {
-        createLayer();
-    }
-    activeLayer = layers[layers.length - 1];
-    updateLayersList();
-    redrawCanvas();
-}
-
-function setActiveLayer(index) {
-    activeLayer = layers[index];
-    updateLayersList();
-}
-
-function redrawCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    layers.forEach(layer => {
-        ctx.drawImage(layer.canvas, 0, 0);
-    });
-}
-
-addLayerBtn.addEventListener('click', createLayer);
-
-const imageUpload = document.getElementById('imageUpload');
-
 function handleImageUpload(e) {
     const file = e.target.files[0];
+    if (!file) return;
+
     const reader = new FileReader();
-    
-    reader.onload = function(event) {
+    reader.onload = function (event) {
         const img = new Image();
-        img.onload = function() {
-            const aspectRatio = img.width / img.height;
-            let newWidth = canvas.width;
-            let newHeight = canvas.height;
-            
-            if (img.width > img.height) {
-                newHeight = canvas.width / aspectRatio;
-            } else {
-                newWidth = canvas.height * aspectRatio;
-            }
-            
-            activeLayer.ctx.drawImage(img, 0, 0, newWidth, newHeight);
-            redrawCanvas();
+        img.onload = function () {
+            ctx.drawImage(img, 0, 0);
             saveDrawingState();
         }
         img.src = event.target.result;
     }
-    
     reader.readAsDataURL(file);
 }
-imageUpload.addEventListener('change', handleImageUpload);
 
-const resizeCanvasBtn = document.getElementById('resizeCanvasBtn');
-const resizeModal = document.getElementById('resizeModal');
-const applyResizeBtn = document.getElementById('applyResizeBtn');
-const cancelResizeBtn = document.getElementById('cancelResizeBtn');
-const canvasWidthInput = document.getElementById('canvasWidth');
-const canvasHeightInput = document.getElementById('canvasHeight');
-
-function openResizeModal() {
-    resizeModal.style.display = 'block';
-    canvasWidthInput.value = canvas.width;
-    canvasHeightInput.value = canvas.height;
+function toggleResizeModal() {
+    resizeModal.style.display = resizeModal.style.display === 'block' ? 'none' : 'block';
 }
 
-function closeResizeModal() {
-    resizeModal.style.display = 'none';
-}
-
-function applyResize() {
+function applyCanvasResize() {
     const newWidth = parseInt(canvasWidthInput.value);
     const newHeight = parseInt(canvasHeightInput.value);
-    
-    if (newWidth > 0 && newHeight > 0) {
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
-        
+
+    if (newWidth && newHeight) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         canvas.width = newWidth;
         canvas.height = newHeight;
-        ctx.drawImage(tempCanvas, 0, 0, newWidth, newHeight);
-        
-        layers.forEach(layer => {
-            const layerTempCanvas = document.createElement('canvas');
-            layerTempCanvas.width = layer.canvas.width;
-            layerTempCanvas.height = layer.canvas.height;
-            layerTempCanvas.getContext('2d').drawImage(layer.canvas, 0, 0);
-            
-            layer.canvas.width = newWidth;
-            layer.canvas.height = newHeight;
-            layer.ctx.drawImage(layerTempCanvas, 0, 0, newWidth, newHeight);
-        });
-        
-        redrawCanvas();
+        ctx.putImageData(imageData, 0, 0);
         saveDrawingState();
-        closeResizeModal();
+        toggleResizeModal();
     }
 }
 
-resizeCanvasBtn.addEventListener('click', openResizeModal);
-applyResizeBtn.addEventListener('click', applyResize);
-cancelResizeBtn.addEventListener('click', closeResizeModal);
+function createGradient(e) {
+    const x = e.clientX - canvas.offsetLeft;
+    const y = e.clientY - canvas.offsetTop;
+
+    if (!gradientStartPoint) {
+        gradientStartPoint = { x, y };
+        return;
+    }
+
+    const gradientEndPoint = { x, y };
+    const grd = gradientType.value === 'linear' ?
+        ctx.createLinearGradient(gradientStartPoint.x, gradientStartPoint.y, gradientEndPoint.x, gradientEndPoint.y) :
+        ctx.createRadialGradient(gradientStartPoint.x, gradientStartPoint.y, 5, gradientEndPoint.x, gradientEndPoint.y, Math.max(canvas.width, canvas.height));
+
+    grd.addColorStop(0, gradientColor1.value);
+    grd.addColorStop(1, gradientColor2.value);
+
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    gradientStartPoint = null;
+    isGradientMode = false;
+    gradientTool.classList.remove('active');
+    saveDrawingState();
+}
+
+function toggleGradientMode() {
+    isGradientMode = !isGradientMode;
+    gradientTool.classList.toggle('active');
+    gradientStartPoint = null;
+}
+
+function addLayer() {
+    const newLayer = document.createElement('li');
+    newLayer.textContent = `Layer ${layers.length + 1}`;
+    newLayer.dataset.index = layers.length;
+    newLayer.addEventListener('click', () => setActiveLayer(newLayer));
+    layersList.appendChild(newLayer);
+    layers.push(newLayer);
+    setActiveLayer(newLayer);
+}
+
+function setActiveLayer(layer) {
+    layers.forEach(l => l.classList.remove('active'));
+    layer.classList.add('active');
+    activeLayer = layer.dataset.index;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(layers[activeLayer].canvas, 0, 0);
+    saveDrawingState();
+}
+
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mousemove', draw);
+clearButton.addEventListener('click', clearCanvas);
+eraserButton.addEventListener('click', toggleEraser);
+undoButton.addEventListener('click', undo);
+fillButton.addEventListener('click', toggleFill);
+textButton.addEventListener('click', toggleTextMode);
+canvas.addEventListener('click', addText);
+imageUpload.addEventListener('change', handleImageUpload);
+resizeCanvasBtn.addEventListener('click', toggleResizeModal);
+applyResizeBtn.addEventListener('click', applyCanvasResize);
+cancelResizeBtn.addEventListener('click', toggleResizeModal);
+gradientTool.addEventListener('click', toggleGradientMode);
+addLayerBtn.addEventListener('click', addLayer);
+
+addLayer();
